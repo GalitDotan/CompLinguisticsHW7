@@ -14,9 +14,9 @@ This module contains two classes:
     counts (unigrams, bigrams, MLE etc), given a filtered corpus.
     It has a constructor which receives a filtered corpus (provided as an initialized
     instance of the CorpusReader class), and:
-    * gathers unigram and bigram raw count
-    * obtains MLE unigram and bigram probabilities and applies Laplace smoothing.
-    * The probabilities are saved as instance variables
+        • gathers unigram and bigram raw count
+        • obtains MLE unigram and bigram probabilities and applies Laplace smoothing.
+        • The probabilities are saved as instance variables
 """
 import string
 from urllib import request

@@ -23,7 +23,7 @@ URL = 'http://www.gutenberg.org/files/76/76-0.txt'
 INITIAL_TEMPERATURE = 10
 COOLING_RATE = 0.95
 THREASHOLD = pow(10, -1)
-ENC_MESSAGE_FILE = 'http://www.gutenberg.org/files/76/76-0.txt'
+ENC_MESSAGE_FILE = 'problemset_07_encrypted_input.txt'
 
 
 def _read_msg_from_file(filename: str = ENC_MESSAGE_FILE):
@@ -69,8 +69,10 @@ def main():
     sim_annealing = SimulatedAnnealing(init_temp=INITIAL_TEMPERATURE,
                                        threshold=THREASHOLD,
                                        cool_rate=COOLING_RATE)
-    winning_perm = sim_annealing.run(initial_hypothesis)
     encrypted_message = _read_msg_from_file()
+    winning_perm = sim_annealing.run(initial_perm=initial_hypothesis,
+                                     enc_msg=encrypted_message,
+                                     lang_model=lang_model)
     deciphered_message = winning_perm.decipher(encrypted_message)
 
     # 6. print results

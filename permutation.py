@@ -6,7 +6,7 @@ Classes:
 
 1. Permutation:
     1) Constructor:
-        The constructor receives some mapping between the characters # TODO: how to map?
+        The constructor receives some mapping between the characters
     2)  get_neighbor:
          returns a random neighbor of the current permutation instance.
          A neighbor of a permutation is defined as a new permutation that
