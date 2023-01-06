@@ -19,21 +19,29 @@ This module contains two classes:
     * The probabilities are saved as instance variables
 """
 import string
-import urllib  # TODO: use this in the constructor of CorpusReader
+from urllib import request
 
-KNOWN_CHARACTERS = tuple(string.ascii_lowercase.split("") + [",", ".", ":", "\n", "#", "(", ")", "!", "?", "'", '"'])
+KNOWN_CHARACTERS = tuple(list(string.ascii_lowercase) + [",", ".", ":", "\n", "#", "(", ")", "!", "?", "'", '"'])
 
 
 class CorpusReader:
-    def __init__(self, url: str):
-        unfiltered_content = self._get_content(url)
-        self._message = self._filter(unfiltered_content)
+    def __init__(self, url: str, alphabet: list[str] = KNOWN_CHARACTERS):
+        self._alphabet = alphabet
+        unfiltered_content = CorpusReader._get_content(url)
+        self._corpus = self._filter(unfiltered_content)
 
-    def _get_content(self, url: str) -> str:
-        raise NotImplementedError()
+    @staticmethod
+    def _get_content(url: str) -> str:
+        with request.urlopen(url) as response:
+            return response.read()
 
-    def _filter(self, message: str, alphabet: list[str] = KNOWN_CHARACTERS, to_lower: bool = True) -> str:
-        raise NotImplementedError()
+    def _filter(self, text: str, to_lower: bool = True) -> str:
+        if to_lower:
+            text = text.lower()
+        return "".join([c for c in [chr(n) for n in [*text]] if c in self._alphabet])
+
+    def get_corpus(self) -> str:
+        return self._corpus
 
 
 class LanguageModel:

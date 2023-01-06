@@ -55,13 +55,12 @@ def _format_results(perm: Permutation, init_temp: int, threashold: float, coolin
 
 
 def main():
-    raise NotImplementedError()
-
     # 1. read the corpus
     corpus = CorpusReader(url=URL)
+    print(corpus.get_corpus())
 
     # 2+3. create a language model and read the encrypted message
-    lang_model = language_model.LanguageModel(corpus)
+    lang_model = LanguageModel(corpus)
 
     # 4. create initial hypothesis
     initial_hypothesis = Permutation()
