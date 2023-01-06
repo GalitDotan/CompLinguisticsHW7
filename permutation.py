@@ -27,8 +27,13 @@ from language_model import KNOWN_CHARACTERS, LanguageModel
 
 
 class Permutation:
-    def __init__(self, perm: dict[str, str]):
-        self.perm: dict[str, str] = perm
+    _DEFAULT_PERM = {i: i for i in KNOWN_CHARACTERS}
+
+    def __init__(self, perm: dict[str, str] = None):
+        self.perm: dict[str, str] = perm if perm is not None else Permutation._DEFAULT_PERM
+
+    def __repr__(self):
+        return str(self.perm)
 
     def get_neighbor(self) -> 'Permutation':
         raise NotImplementedError()
@@ -38,3 +43,6 @@ class Permutation:
 
     def get_energy(self, enc_message: str, lang_module: LanguageModel):
         raise NotImplementedError()
+
+    def decipher(self, enc_msg: str):
+        return "".join([self.perm.get(c, c) for c in enc_msg.split("")])
