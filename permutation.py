@@ -22,6 +22,7 @@ Classes:
         to the permutation key, and evaluating the probability of this translated sequence
         of characters according to the language model.
 """
+import random
 from random import choice  # TODO: use in get_neighbor to get the thing
 from language_model import KNOWN_CHARACTERS, LanguageModel
 
@@ -36,13 +37,35 @@ class Permutation:
         return str(self.perm)
 
     def get_neighbor(self) -> 'Permutation':
-        raise NotImplementedError()
+        keys = list(self.perm.keys())
+        key1 = random.choice(keys)
+        key2 = random.choice(keys)
+        return Permutation(self._swap(key1, key2))
+
+    def _swap(self, key1: str, key2: str) -> dict:
+        new_perm = self.perm.copy()
+        new_perm.update({
+            key1: new_perm[key2],
+            key2: new_perm[key1]
+        })
+        return new_perm
 
     def translate(self, string: str) -> str:
-        raise NotImplementedError()
+        return "".join([self.perm.get(c, c) for c in string])
 
-    def get_energy(self, enc_message: str, lang_module: LanguageModel):
-        raise NotImplementedError()
-
-    def decipher(self, enc_msg: str):
-        return "".join([self.perm.get(c, c) for c in enc_msg.split("")])
+    def get_energy(self, enc_message: str, lang_module: LanguageModel) -> float:
+        """
+        Get the result of translating the encrypted message according
+        to the permutation key, and evaluating the probability of this translated sequence
+        of characters according to the language model.
+        :param enc_message: the message to encrypt
+        :param lang_module: the language model
+        :return: for a decrypted message (w1,w2,...,wn) it would return (-log_2(P(w1) - ... -log_2(P(w_n|w_1))
+        """
+        result = 0.0
+        w_prev = None
+        dec_message = list(self.translate(enc_message))
+        energy = -lang_module.get_mle_unigram(dec_message[0])
+        for i in range(1, len(dec_message)):
+            energy -= lang_module.get_mle_bigram(dec_message[i], dec_message[i - 1])
+        return energy

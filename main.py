@@ -73,7 +73,7 @@ def main():
     winning_perm = sim_annealing.run(initial_perm=initial_hypothesis,
                                      enc_msg=encrypted_message,
                                      lang_model=lang_model)
-    deciphered_message = winning_perm.decipher(encrypted_message)
+    deciphered_message = winning_perm.translate(encrypted_message)
 
     # 6. print results
     print(_format_results(perm=winning_perm,
