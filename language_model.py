@@ -56,6 +56,11 @@ class CorpusReader:
         return ''.join([c for c in unfiltered_chars if c in self._extended_alphabet])
 
     def get_corpus(self) -> list[str]:
+        """
+        Get the formatted and filtered version of the corpus
+
+        :return: the corpus
+        """
         return self._corpus_chars
 
 
@@ -75,6 +80,10 @@ class LanguageModel:
         self._mle_bigram = self._calc_mle(self._bigram_cnt, self._log_prob_of_w2_given_w1)
 
     def __repr__(self):
+        """
+        :return: a string representation of the model:
+        shows the MLE unigrams and bigrams
+        """
         return f'Unigrams: {self._mle_unigram}\n' \
                f'Bigrams: {self._mle_bigram}'
 
@@ -105,13 +114,28 @@ class LanguageModel:
         return math.log2((c_w2_then_w1 + 1) / (c_w1 + v))
 
     def get_mle_unigram(self, w: str) -> float:
+        """
+        Get the value in the MLE unigram for a given word
+        :param w: a word
+        :return: the value
+        """
         return self._mle_unigram.get(w, self._log_prob_of_w(w))
 
     def get_mle_bigram(self, words: tuple[str, str]) -> float:
+        """
+        Get the value in the MLE bigram for given words
+        :param words: (w2, w1)
+        :return: the value
+        """
         w2, w1 = words
         return self._mle_bigram.get(words, self._log_prob_of_w2_given_w1((w2, w1)))
 
     def _gather_unigram_raw_count(self) -> dict[str, int]:
+        """
+        Count all words in the corpus
+
+        :return: a dictionary of raw counts for each word
+        """
         unigram_cnt = {}
         for word in self._corpus:
             curr_cnt = unigram_cnt.setdefault(word, 0)
@@ -119,6 +143,11 @@ class LanguageModel:
         return unigram_cnt
 
     def _gather_bigram_raw_count(self) -> dict[tuple[str, str], int]:
+        """
+        Count all pairs (w2, w1) in the corpus (times w2 appears right aafter w1)
+
+        :return: a dictionary of raw counts for each pair
+        """
         bigram_cnt = {}
         for i in range(1, len(self._corpus)):
             bigram = (self._corpus[i], self._corpus[i - 1])
@@ -127,4 +156,12 @@ class LanguageModel:
         return bigram_cnt
 
     def _calc_mle(self, counts: dict[Any, int], prob_func: Callable) -> dict[Any, float]:
+        """
+        Given a dictionary of raw counts, and a probability function,
+        calculate the MLE.
+
+        :param counts:  a dictionary of raw counts
+        :param prob_func: a probability function
+        :return: the MLE
+        """
         return {key: prob_func(key) for key in counts}

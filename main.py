@@ -27,19 +27,37 @@ ENC_MESSAGE_FILE = 'problemset_07_encrypted_input.txt'
 
 
 def _read_msg_from_file(filename: str = ENC_MESSAGE_FILE):
+    """
+    Given a file, read and return its content
+
+    :param filename: the filename (location)
+    :return: file's content
+    """
     with open(filename) as f:
         return f.read()
 
 
-def _format_results(perm: Permutation, init_temp: int, threashold: float, cooling_rate: float, enc_msg: str,
+def _format_results(winning_perm: Permutation, init_temp: int, threashold: float, cooling_rate: float, enc_msg: str,
                     dec_msg: str):
+    """
+    Receive the results of the experiment and format them to a printable string, that shows:
+    The winning permutation, the simulated annealing parameters, the encrypted message and decrypted message.
+
+    :param winning_perm: the winning permutation
+    :param init_temp: the initial temperature
+    :param threashold: the threashold
+    :param cooling_rate: the cooling rate
+    :param enc_msg: the encrypted message
+    :param dec_msg: the decrypted message
+    :return: the formatted string
+    """
     return f"""
     ######################################################################################
     
     ### RESULTS: ###
     
     # The winning permutation #
-    {perm}
+    {winning_perm}
     
     # The parameters used in the simulated annealing #
         Initial temperature = {init_temp}
@@ -71,13 +89,13 @@ def main():
                                        threshold=THREASHOLD,
                                        cool_rate=COOLING_RATE)
     encrypted_message = _read_msg_from_file()
-    winning_perm = sim_annealing.run(initial_perm=initial_hypothesis,
+    winning_perm = sim_annealing.run(initial_hypothesis=initial_hypothesis,
                                      enc_msg=encrypted_message,
                                      lang_model=lang_model)
     deciphered_message = winning_perm.translate(encrypted_message)
 
     # 6. print results
-    print(_format_results(perm=winning_perm,
+    print(_format_results(winning_perm=winning_perm,
                           init_temp=INITIAL_TEMPERATURE,
                           threashold=THREASHOLD,
                           cooling_rate=COOLING_RATE,

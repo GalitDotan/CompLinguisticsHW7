@@ -33,8 +33,16 @@ class SimulatedAnnealing:
         self._threshold: float = threshold
         self._cool_rate: float = cool_rate
 
-    def run(self, initial_perm: Permutation, enc_msg: str, lang_model: LanguageModel) -> Permutation:
-        h = initial_perm
+    def run(self, initial_hypothesis: Permutation, enc_msg: str, lang_model: LanguageModel) -> Permutation:
+        """
+        Run the simulated annealing on some initial hypothesis, encrypted message and language model
+
+        :param initial_hypothesis: some initial hypothesis
+        :param enc_msg: some encrypted message
+        :param lang_model: some language model
+        :return: the winning hypothesis
+        """
+        h = initial_hypothesis
         t = self._init_temp
         while t > self._threshold:
             new_h = h.get_neighbor()
@@ -45,10 +53,30 @@ class SimulatedAnnealing:
         return h
 
     @staticmethod
-    def _get_delta(old_perm: Permutation, new_perm: Permutation, msg: str, lang_model: LanguageModel):
+    def _get_delta(old_perm: Permutation, new_perm: Permutation, msg: str, lang_model: LanguageModel) -> float:
+        """
+        Calculate the delta in energy between the old permutation and the new permutation
+
+        :param old_perm: a permutation
+        :param new_perm: a permutation
+        :param msg: the message to check the energy on
+        :param lang_model: the language model to check by
+        :return: the delta
+        """
         return new_perm.get_energy(msg, lang_model) - old_perm.get_energy(msg, lang_model)
 
     @staticmethod
     def _choose(old_perm: Permutation, new_perm: Permutation, p: float) -> Permutation:
+        """
+        Choose weather to keep the old permutation, or switch to the new one,
+        using a given probability p.
+        The function randomly chooses a number between [0, 1].
+        If r < p it returns the new permutation, otherwise the old one.
+
+        :param old_perm: some permutation
+        :param new_perm: some permutation, that is different only by one swap from old_perm
+        :param p: a probability
+        :return: the winning permutation of the two
+        """
         r = random()
         return new_perm if r < p else old_perm
