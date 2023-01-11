@@ -20,23 +20,18 @@ This module contains two classes:
 """
 import math
 import string
-from time import sleep
 from typing import Any, Callable
 from urllib import request
 
-KNOWN_CHARACTERS = tuple(list(string.ascii_lowercase) + [",", ".", ":", "\n", "#", "(", ")", "!", "?", "'", '"'])
-KNOWN_CHARACTERS_WITH_SPACE = KNOWN_CHARACTERS + (" ",)
+KNOWN_CHARACTERS = tuple(list(string.ascii_lowercase) + [",", ".", ":", "\n", "#", "(", ")", "!", "?", "'", '"', " "])
 
 
 class CorpusReader:
-    def __init__(self, url: str, alphabet: list[str] = KNOWN_CHARACTERS_WITH_SPACE):
+    def __init__(self, url: str, alphabet: list[str] = KNOWN_CHARACTERS):
         self._extended_alphabet = alphabet
-        try:
-            unfiltered_content = CorpusReader._get_raw_corpus(url)
-        except Exception:
-            unfiltered_content = CorpusReader._get_raw_corpus_offline()
-        self._corpus_str = self._filter_corpus(unfiltered_content)
-        self._corpus_words = self._corpus_str.split()
+        unfiltered_content: str = CorpusReader._get_raw_corpus(url)
+        self._corpus_str: str = self._filter_corpus(unfiltered_content)
+        self._corpus_chars: list[str] = list(self._corpus_str)
 
     @staticmethod
     def _get_raw_corpus(url: str) -> str:
@@ -48,11 +43,6 @@ class CorpusReader:
         """
         with request.urlopen(url) as response:
             return response.read()
-
-    @staticmethod
-    def _get_raw_corpus_offline():
-        with open('corpus.txt', 'br') as f:
-            return f.read()
 
     def _filter_corpus(self, corpus: str, to_lower: bool = True) -> str:
         """
@@ -66,24 +56,27 @@ class CorpusReader:
         return ''.join([c for c in unfiltered_chars if c in self._extended_alphabet])
 
     def get_corpus(self) -> list[str]:
-        return self._corpus_words
+        return self._corpus_chars
 
 
 class LanguageModel:
     def __init__(self, corpus_reader: CorpusReader, known_characters: tuple[str] = KNOWN_CHARACTERS):
-        self._corpus_reader: CorpusReader = corpus_reader
         self._known_chars: tuple[str] = known_characters
 
-        self._corpus: list[str] = self._corpus_reader.get_corpus()
+        self._corpus: list[str] = corpus_reader.get_corpus()
         self._corpus_size: int = len(self._corpus)
 
         self._unigram_cnt: dict[str, int] = self._gather_unigram_raw_count()
         self._bigram_cnt: dict[tuple[str, str], int] = self._gather_bigram_raw_count()
 
-        self._vocabulary_size: int = len(self._unigram_cnt.keys())
+        self._vocabulary_size: int = len(known_characters)
 
         self._mle_unigram = self._calc_mle(self._unigram_cnt, self._log_prob_of_w)
         self._mle_bigram = self._calc_mle(self._bigram_cnt, self._log_prob_of_w2_given_w1)
+
+    def __repr__(self):
+        return f'Unigrams: {self._mle_unigram}\n' \
+               f'Bigrams: {self._mle_bigram}'
 
     def _log_prob_of_w(self, w: str):
         """

@@ -30,25 +30,23 @@ from language_model import KNOWN_CHARACTERS, LanguageModel
 class Permutation:
     _DEFAULT_PERM = {i: i for i in KNOWN_CHARACTERS}
 
-    def __init__(self, perm: dict[str, str] = None, enc_message: str = ""):
-        self.perm: dict[str, str] = perm if perm is not None else Permutation._DEFAULT_PERM
+    def __init__(self, perm: dict[str, str] = None, enc_message: str = "", swapped: tuple[str, str] = ()):
+        self._perm: dict[str, str] = perm if perm is not None else Permutation._DEFAULT_PERM
         self._enc_message = enc_message
         self._dec_message = self.translate(enc_message)
+        self._swapped = swapped
 
     def __repr__(self):
-        if self._enc_message == "":
-            return str(self.perm)
-        else:
-            return self._dec_message
+        return str(self._perm)
 
     def get_neighbor(self) -> 'Permutation':
-        keys = list(self.perm.keys())
+        keys = list(self._perm.keys())
         key1 = random.choice(keys)
         key2 = random.choice(keys)
-        return Permutation(self._swap(key1, key2))
+        return Permutation(self._swap(key1, key2), swapped=(key1, key2))
 
     def _swap(self, key1: str, key2: str) -> dict:
-        new_perm = self.perm.copy()
+        new_perm = self._perm.copy()
         new_perm.update({
             key1: new_perm[key2],
             key2: new_perm[key1]
@@ -56,7 +54,13 @@ class Permutation:
         return new_perm
 
     def translate(self, string: str) -> str:
-        return "".join([self.perm.get(c, c) for c in string])
+        """
+        Translate a string by the current permutation
+
+        :param string: the string to translate
+        :return: the translated string
+        """
+        return "".join([self._perm.get(c, c) for c in string])
 
     def get_energy(self, enc_message: str, lang_module: LanguageModel) -> float:
         """

@@ -22,7 +22,7 @@ from simulated_annealing import SimulatedAnnealing
 URL = 'http://www.gutenberg.org/files/76/76-0.txt'
 INITIAL_TEMPERATURE = 100
 COOLING_RATE = 0.9995
-THREASHOLD = pow(10, -5)
+THREASHOLD = pow(10, -3)
 ENC_MESSAGE_FILE = 'problemset_07_encrypted_input.txt'
 
 
@@ -35,22 +35,24 @@ def _format_results(perm: Permutation, init_temp: int, threashold: float, coolin
                     dec_msg: str):
     return f"""
     ######################################################################################
+    
     ### RESULTS: ###
     
-    The winning permutation is {perm}
+    # The winning permutation #
+    {perm}
     
-    The parameters used in the simulated annealing were:
+    # The parameters used in the simulated annealing #
         Initial temperature = {init_temp}
         Threashold = {threashold}
         Cooling rate = {cooling_rate} 
     
-    Encrypted message:
+    # The encrypted message #
     {enc_msg}
     
-    Decrypted message:
+    # The decrypted message #
     {dec_msg}
-    ######################################################################################
     
+    ######################################################################################
     """
 
 
