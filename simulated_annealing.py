@@ -34,7 +34,6 @@ class SimulatedAnnealing:
         self._cool_rate: float = cool_rate
 
     def run(self, initial_perm: Permutation, enc_msg: str, lang_model: LanguageModel) -> Permutation:
-        d = enc_msg
         h = initial_perm
         t = self._init_temp
         while t > self._threshold:

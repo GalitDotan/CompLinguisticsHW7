@@ -20,9 +20,9 @@ from permutation import Permutation
 from simulated_annealing import SimulatedAnnealing
 
 URL = 'http://www.gutenberg.org/files/76/76-0.txt'
-INITIAL_TEMPERATURE = 10
-COOLING_RATE = 0.95
-THREASHOLD = pow(10, -1)
+INITIAL_TEMPERATURE = 100
+COOLING_RATE = 0.9995
+THREASHOLD = pow(10, -5)
 ENC_MESSAGE_FILE = 'problemset_07_encrypted_input.txt'
 
 
@@ -57,7 +57,6 @@ def _format_results(perm: Permutation, init_temp: int, threashold: float, coolin
 def main():
     # 1. read the corpus
     corpus = CorpusReader(url=URL)
-    print(corpus.get_corpus())
 
     # 2+3. create a language model and read the encrypted message
     lang_model = LanguageModel(corpus)

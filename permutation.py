@@ -30,11 +30,16 @@ from language_model import KNOWN_CHARACTERS, LanguageModel
 class Permutation:
     _DEFAULT_PERM = {i: i for i in KNOWN_CHARACTERS}
 
-    def __init__(self, perm: dict[str, str] = None):
+    def __init__(self, perm: dict[str, str] = None, enc_message: str = ""):
         self.perm: dict[str, str] = perm if perm is not None else Permutation._DEFAULT_PERM
+        self._enc_message = enc_message
+        self._dec_message = self.translate(enc_message)
 
     def __repr__(self):
-        return str(self.perm)
+        if self._enc_message == "":
+            return str(self.perm)
+        else:
+            return self._dec_message
 
     def get_neighbor(self) -> 'Permutation':
         keys = list(self.perm.keys())
@@ -62,10 +67,9 @@ class Permutation:
         :param lang_module: the language model
         :return: for a decrypted message (w1,w2,...,wn) it would return (-log_2(P(w1) - ... -log_2(P(w_n|w_1))
         """
-        result = 0.0
-        w_prev = None
         dec_message = list(self.translate(enc_message))
         energy = -lang_module.get_mle_unigram(dec_message[0])
         for i in range(1, len(dec_message)):
-            energy -= lang_module.get_mle_bigram(dec_message[i], dec_message[i - 1])
+            words = (dec_message[i], dec_message[i - 1])
+            energy -= lang_module.get_mle_bigram(words)
         return energy

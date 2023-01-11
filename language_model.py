@@ -20,28 +20,50 @@ This module contains two classes:
 """
 import math
 import string
+from time import sleep
 from typing import Any, Callable
 from urllib import request
 
 KNOWN_CHARACTERS = tuple(list(string.ascii_lowercase) + [",", ".", ":", "\n", "#", "(", ")", "!", "?", "'", '"'])
+KNOWN_CHARACTERS_WITH_SPACE = KNOWN_CHARACTERS + (" ",)
 
 
 class CorpusReader:
-    def __init__(self, url: str, alphabet: list[str] = KNOWN_CHARACTERS):
-        self._alphabet = alphabet
-        unfiltered_content = CorpusReader._get_content(url)
-        self._corpus_str = self._filter_text(unfiltered_content)
-        self._corpus_words = " ".split(self._corpus_str)
+    def __init__(self, url: str, alphabet: list[str] = KNOWN_CHARACTERS_WITH_SPACE):
+        self._extended_alphabet = alphabet
+        try:
+            unfiltered_content = CorpusReader._get_raw_corpus(url)
+        except Exception:
+            unfiltered_content = CorpusReader._get_raw_corpus_offline()
+        self._corpus_str = self._filter_corpus(unfiltered_content)
+        self._corpus_words = self._corpus_str.split()
 
     @staticmethod
-    def _get_content(url: str) -> str:
+    def _get_raw_corpus(url: str) -> str:
+        """
+        Get a corpus from a given URL
+
+        :param url: the link to the corpus
+        :return: the text
+        """
         with request.urlopen(url) as response:
             return response.read()
 
-    def _filter_text(self, text: str, to_lower: bool = True) -> str:
-        if to_lower:
-            text = text.lower()
-        return "".join([c for c in [chr(n) for n in [*text]] if c in self._alphabet])
+    @staticmethod
+    def _get_raw_corpus_offline():
+        with open('corpus.txt', 'br') as f:
+            return f.read()
+
+    def _filter_corpus(self, corpus: str, to_lower: bool = True) -> str:
+        """
+        Filter a given corpus to include only known characters and change all characters to lowercase (if needed)
+
+        :param corpus: some text
+        :param to_lower: whether to replace all characters to lowercase
+        :return: the corpus filtered (will contain only the known characters in the model)
+        """
+        unfiltered_chars = [chr(x).lower() if to_lower else chr(x) for x in list(corpus)]
+        return ''.join([c for c in unfiltered_chars if c in self._extended_alphabet])
 
     def get_corpus(self) -> list[str]:
         return self._corpus_words
@@ -75,7 +97,7 @@ class LanguageModel:
         v = self._vocabulary_size
         return math.log2((c_w + 1) / (n + v))
 
-    def _log_prob_of_w2_given_w1(self, w2: str, w1: str):
+    def _log_prob_of_w2_given_w1(self, words: tuple[str, str]):
         """
         Get probability P(w2 | w1) with Laplace smoothing.
 
@@ -83,6 +105,7 @@ class LanguageModel:
         :param w1: a word.
         :return: P(w2 | w1) with Laplace smoothing.
         """
+        w2, w1 = words
         c_w2_then_w1 = self._bigram_cnt.get((w2, w1), 0)
         c_w1 = self._unigram_cnt.get(w1, 0)
         v = self._vocabulary_size
@@ -91,8 +114,9 @@ class LanguageModel:
     def get_mle_unigram(self, w: str) -> float:
         return self._mle_unigram.get(w, self._log_prob_of_w(w))
 
-    def get_mle_bigram(self, w2: str, w1: str) -> float:
-        return self._mle_bigram.get((w2, w1), self._log_prob_of_w2_given_w1(w2, w1))
+    def get_mle_bigram(self, words: tuple[str, str]) -> float:
+        w2, w1 = words
+        return self._mle_bigram.get(words, self._log_prob_of_w2_given_w1((w2, w1)))
 
     def _gather_unigram_raw_count(self) -> dict[str, int]:
         unigram_cnt = {}
@@ -110,4 +134,4 @@ class LanguageModel:
         return bigram_cnt
 
     def _calc_mle(self, counts: dict[Any, int], prob_func: Callable) -> dict[Any, float]:
-        return {word: prob_func(word) for word in counts}
+        return {key: prob_func(key) for key in counts}
