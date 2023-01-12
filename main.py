@@ -88,7 +88,11 @@ def main():
     sim_annealing = SimulatedAnnealing(init_temp=INITIAL_TEMPERATURE,
                                        threshold=THREASHOLD,
                                        cool_rate=COOLING_RATE)
-    encrypted_message = _read_msg_from_file()
+    try:
+        encrypted_message = _read_msg_from_file()
+    except Exception:
+        print(f'Missing the file "{ENC_MESSAGE_FILE}" from the work directory.')
+        return
     winning_perm = sim_annealing.run(initial_hypothesis=initial_hypothesis,
                                      enc_msg=encrypted_message,
                                      lang_model=lang_model)
